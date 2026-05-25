@@ -1,0 +1,269 @@
+ tkinter import *
+
+
+window = Tk()
+window.geometry('800x800')
+window.title("Tic-Tac-Toe")
+
+icon = PhotoImage(file="icon.png")
+window.iconphoto(True, icon)
+
+player = "X"
+
+values = [
+    ['1', '2', '3'],
+    ['4', '5', '6'],
+    ['7', '8', '9']
+]
+
+buttons = []
+
+
+def gamestart():
+
+    buttons.clear()
+
+    # Center rows and columns
+    for i in range(3):
+        window.grid_columnconfigure(i, weight=1)
+
+    for i in range(6):
+        window.grid_rowconfigure(i, weight=1)
+
+    for row in range(3):
+
+        row_buttons = []
+
+        for col in range(3):
+
+            button = Button(
+                window,
+                text=values[row][col],
+                font=("Arial", 30, "bold"),
+                width=5,
+                height=2,
+                bg="white"
+            )
+
+            button.config(command=lambda b=button: play(b))
+
+            # CENTERED BUTTONS
+            button.grid(
+                row=row + 1,
+                column=col,
+                padx=10,
+                pady=10,
+                sticky="nsew"
+            )
+
+            row_buttons.append(button)
+
+        buttons.append(row_buttons)
+
+def check_winner():
+
+    # Rows
+    for row in range(3):
+
+        if buttons[row][0]["text"] == buttons[row][1]["text"] == buttons[row][2]["text"]:
+
+            if buttons[row][0]["text"] in ["X", "O"]:
+                return buttons[row][0]["text"]
+
+    # Columns
+    for col in range(3):
+
+        if buttons[0][col]["text"] == buttons[1][col]["text"] == buttons[2][col]["text"]:
+
+            if buttons[0][col]["text"] in ["X", "O"]:
+                return buttons[0][col]["text"]
+
+    # Diagonal 1
+    if buttons[0][0]["text"] == buttons[1][1]["text"] == buttons[2][2]["text"]:
+
+        if buttons[0][0]["text"] in ["X", "O"]:
+            return buttons[0][0]["text"]
+
+    # Diagonal 2
+    if buttons[0][2]["text"] == buttons[1][1]["text"] == buttons[2][0]["text"]:
+
+        if buttons[0][2]["text"] in ["X", "O"]:
+            return buttons[0][2]["text"]
+
+    return None
+
+
+def check_draw():
+
+    for row in buttons:
+        for button in row:
+
+            if button["text"] not in ["X", "O"]:
+                return False
+
+    return True
+
+
+def show_end_buttons():
+
+    again_button = Button(
+        window,
+        text="Play Again",
+        font=("Arial", 15, "bold"),
+        bg="green",
+        fg="white",
+        command=restart_game
+    )
+
+    again_button.grid(row=5, column=0)
+
+    exit_button = Button(
+        window,
+        text="Exit",
+        font=("Arial", 15, "bold"),
+        bg="red",
+        fg="white",
+        command=window.destroy
+    )
+
+    exit_button.grid(row=5, column=2)
+
+
+def restart_game():
+
+    global player
+
+    player = "X"
+
+    # Remove old buttons
+    for row in buttons:
+        for button in row:
+            button.destroy()
+
+    buttons.clear()
+
+    # Remove labels/buttons below game
+    for widget in window.grid_slaves():
+
+        if int(widget.grid_info()["row"]) >= 4:
+            widget.destroy()
+
+    gamestart()
+
+
+def play(button):
+
+    global player
+
+    # Prevent overwriting
+    if button["text"] not in ["X", "O"]:
+
+        button.config(text=player)
+
+        winner = check_winner()
+
+        # Winner
+        if winner:
+
+            win_label = Label(
+                window,
+                text=f"{winner} Wins!",
+                font=("Arial", 25, "bold"),
+                fg="green",
+                bg="black"
+            )
+
+            win_label.grid(row=4, column=0, columnspan=3)
+
+            # Disable all buttons
+            for row in buttons:
+                for b in row:
+                    b.config(state=DISABLED)
+
+            show_end_buttons()
+
+            return
+
+        # Draw
+        if check_draw():
+
+            draw_label = Label(
+                window,
+                text="It's a Draw!",
+                font=("Arial", 25, "bold"),
+                fg="yellow",
+                bg="black"
+            )
+
+            draw_label.grid(row=4, column=0, columnspan=3)
+
+            show_end_buttons()
+
+            return
+
+        # Switch Player
+        if player == "X":
+            player = "O"
+        else:
+            player = "X"
+
+
+def clickyes():
+
+    label.destroy()
+    button1.destroy()
+    button2.destroy()
+
+    gamestart()
+
+
+def clickno():
+
+    window.destroy()
+
+
+photo = PhotoImage(file="game.png")
+
+label = Label(
+    window,
+    text='Welcome!!\nDo you want to play Tic-Tac-Toe?',
+    font=("Arial", 25, "bold"),
+    fg="yellow",
+    bg="black",
+    relief=RAISED,
+    bd=10,
+    padx=20,
+    pady=20,
+    image=photo,
+    compound=TOP
+)
+
+label.place(x=600, y=300)
+
+button1 = Button(
+    window,
+    text="Yes",
+    font=("Arial", 20, "bold"),
+    fg="green",
+    bg="black",
+    padx=20,
+    pady=20,
+    command=clickyes
+)
+
+button1.place(x=700, y=870)
+
+button2 = Button(
+    window,
+    text="No",
+    font=("Arial", 20, "bold"),
+    fg="red",
+    bg="black",
+    padx=20,
+    pady=20,
+    command=clickno
+)
+
+button2.place(x=1000, y=870)
+
+window.mainloop()
